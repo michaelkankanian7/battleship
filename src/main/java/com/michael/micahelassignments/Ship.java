@@ -8,12 +8,21 @@ public class Ship {
     private Integer height;
     private Color color;
     private boolean vertical = true;
+    private Point startingPoint;
 
     public Ship(Integer width, Integer height, Color color, boolean vertical) {
         this.width = width;
         this.height = height;
         this.color = color;
         this.vertical = vertical;
+    }
+
+    public Point getStartingPoint() {
+        return startingPoint;
+    }
+
+    public void setStartingPoint(Point startingPoint) {
+        this.startingPoint = startingPoint;
     }
 
     public boolean isVertical() {

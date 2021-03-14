@@ -1,14 +1,11 @@
 package com.michael.micahelassignments;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 
 public class PlaceShip extends JFrame implements MouseListener {
     JFrame window = new JFrame("Battleship ");
@@ -18,10 +15,9 @@ public class PlaceShip extends JFrame implements MouseListener {
     JPanel buttonPanel = new JPanel();
     JButton startButton = new JButton("Start");
     JButton flipButton = new JButton("Flip");
-
     JPanel[][] grid;
-
     int size;
+    Map<Color,Ship> shipMap= new HashMap<>();
 
     public PlaceShip(int size) {
         this.size = size;
@@ -45,6 +41,7 @@ public class PlaceShip extends JFrame implements MouseListener {
         buttonPanel.add(startButton);
         buttonPanel.add(flipButton);
 
+        generatePlayerShips();
         placeShipsRandomly();
 
         window.setSize(300, 300);
@@ -63,8 +60,7 @@ public class PlaceShip extends JFrame implements MouseListener {
 
         Random random = new Random();
 
-        generatePlayerShips().forEach(thisship -> {
-
+        shipMap.entrySet().stream().map(e -> e.getValue()).forEach(thisship -> {
             while(true)
             {
                 int randomX = random.nextInt(maxX + 1 - minX) + minX;
@@ -74,24 +70,55 @@ public class PlaceShip extends JFrame implements MouseListener {
                 {
                     if(randomY + thisship.getHeight()<  maxY)
                     {
-
                         //check that we are not overlapping with another ship
+                        LinkedList<Point> points = new LinkedList<>();
 
                         for (int y = randomY; y <= thisship.getHeight()+randomY-1; y++)
                         {
                             for (int x = randomX;x <= thisship.getWidth()+randomX-1;x++ )
                             {
-                                grid[y][x].setBackground(thisship.getColor());
+                                points.add(new Point(x,y));
+
+                                //grid[y][x].setBackground(thisship.getColor());
                             }
                         }
-                        break;
+                        if (addAndValidatePoints(points,thisship)== true)
+                        {
+                            break; //next ship
+                        }
                     }
                 }
             }
         });
     }
 
-    private List<Ship> generatePlayerShips()
+
+
+    private boolean addAndValidatePoints(LinkedList<Point> points,Ship thisship)
+    {
+        //loop to validate fir.st
+        for (Point point : points)
+        {
+            if (grid[point.y][point.x].getBackground() !=Color.blue)
+            {
+                return false;
+            }
+        }
+
+        //assign the first point from the list as the starting point for the ship
+        Ship tempShip = shipMap.get(thisship.getColor());
+        tempShip.setStartingPoint(points.get(0));
+        shipMap.put(tempShip.getColor(),tempShip);
+
+        //loop to apply color
+        for (Point point : points)
+        {
+            grid[point.y][point.x].setBackground(thisship.getColor());
+        }
+        return true;
+    }
+
+    private void generatePlayerShips()
     {
         Ship carrier = new Ship(2,5, Color.green,true);
         Ship battleship = new Ship(1,4, Color.black,true);
@@ -99,14 +126,11 @@ public class PlaceShip extends JFrame implements MouseListener {
         Ship submarine = new Ship(1,3, Color.yellow,true);
         Ship patrolBoat = new Ship(1,2, Color.gray,true);
 
-        List<Ship> lst = new ArrayList<>();
-        lst.add(carrier);
-        lst.add(battleship);
-        lst.add(destroyer);
-        lst.add(submarine);
-        lst.add(patrolBoat);
-        return lst;
-
+        shipMap.put(carrier.getColor(),carrier);
+        shipMap.put(battleship.getColor(),battleship);
+        shipMap.put(destroyer.getColor(),destroyer);
+        shipMap.put(submarine.getColor(),submarine);
+        shipMap.put(patrolBoat.getColor(),patrolBoat);
     }
 
     @Override
@@ -116,7 +140,20 @@ public class PlaceShip extends JFrame implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (e.getSource() == grid[i][j]) {
+                    System.out.println("mouse pressed " + i + " " + j);
+                    if (grid[i][j].getBackground() !=Color.blue)
+                    {
+                        //System.out.println("color is " + grid[i][j].getBackground());
 
+                        Ship tempShip = shipMap.get(grid[i][j].getBackground());
+                        System.out.println(tempShip.getStartingPoint());
+                    }
+                }
+            }
+        }
     }
 
     @Override
