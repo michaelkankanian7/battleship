@@ -4,10 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.*;
 import java.util.List;
 
-public class PlaceShip extends JFrame implements MouseListener {
+public class PlaceShip extends JFrame implements MouseListener , MouseMotionListener  {
     JFrame window = new JFrame("Battleship ");
     JPanel borderPanel = new JPanel(new BorderLayout());
 
@@ -18,6 +19,7 @@ public class PlaceShip extends JFrame implements MouseListener {
     JPanel[][] grid;
     int size;
     Map<Color,Ship> shipMap= new HashMap<>();
+    private Ship selectedShip;
 
     public PlaceShip(int size) {
         this.size = size;
@@ -31,6 +33,7 @@ public class PlaceShip extends JFrame implements MouseListener {
                 grid[i][j] = new JPanel();
                 mainPanel.add(grid[i][j]);
                 grid[i][j].addMouseListener(this);
+                grid[i][j].addMouseMotionListener(this);
                 grid[i][j].setBackground(Color.BLUE);
 
             }
@@ -149,7 +152,8 @@ public class PlaceShip extends JFrame implements MouseListener {
                         //System.out.println("color is " + grid[i][j].getBackground());
 
                         Ship tempShip = shipMap.get(grid[i][j].getBackground());
-                        System.out.println(tempShip.getStartingPoint());
+                        selectedShip = tempShip;
+                        System.out.println(tempShip.getColor());
                     }
                 }
             }
@@ -158,7 +162,10 @@ public class PlaceShip extends JFrame implements MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        //if a ship is seleccted then figure out if it can be moved here then move it
+        //then clear the selected ship
 
+        //if no ship is selecetd do nothing
     }
 
     @Override
@@ -168,6 +175,57 @@ public class PlaceShip extends JFrame implements MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        int buttonsDownMask =MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK;
+
+        if ((e.getModifiersEx() & buttonsDownMask) !=0)
+        {
+            //System.out.println("Mouse Moved");
+            for (int i = 0; i < grid.length; i++) {
+                for (int j = 0; j < grid[0].length; j++) {
+                    Point p = MouseInfo.getPointerInfo().getLocation();
+                    //SwingUtilities.convertPointFromScreen(p,grid[i][j]);
+                    if(isWithinBounds(p.x,p.y,grid[i][j]))
+                    {
+                        System.out.println("i="+i + " j=" + j);
+                    }
+
+//                    if (e.getSource() == grid[i][j]) {
+//                        System.out.println("i="+i+ " j=" + j);
+//                    }
+                }
+            }
+        } else
+        {
+            System.out.println(e.getButton());
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
+
+    }
+
+    private boolean isWithinBounds(int x, int y, Component component) {
+
+        // getBounds() returns a Rectangle.
+        if (x >= component.getBounds().x
+                && x <= component.getBounds().x + component.getBounds().width
+                && y >= component.getBounds().y
+                && y <= component.getBounds().y + component.getBounds().height) {
+
+            return true;
+
+        } else {
+
+            return false;
+
+        }
 
     }
 }
