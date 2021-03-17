@@ -1,6 +1,7 @@
 package com.michael.micahelassignments;
 
 import java.awt.*;
+import java.util.Objects;
 
 public class Ship {
 
@@ -9,12 +10,35 @@ public class Ship {
     private Color color;
     private boolean vertical = true;
     private Point startingPoint;
+    private String shipName;
 
-    public Ship(Integer width, Integer height, Color color, boolean vertical) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ship ship = (Ship) o;
+        return vertical == ship.vertical && width.equals(ship.width) && height.equals(ship.height) && color.equals(ship.color) && shipName.equals(ship.shipName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(width, height, color, vertical, shipName);
+    }
+
+    public Ship(Integer width, Integer height, Color color, boolean vertical, String shipName) {
         this.width = width;
         this.height = height;
         this.color = color;
         this.vertical = vertical;
+        this.shipName = shipName;
+    }
+
+    public String getShipName() {
+        return shipName;
+    }
+
+    public void setShipName(String shipName) {
+        this.shipName = shipName;
     }
 
     public Point getStartingPoint() {
