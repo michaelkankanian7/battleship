@@ -1,5 +1,7 @@
 package com.michael.micahelassignments;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -15,10 +17,12 @@ public class PlaceShip extends JFrame implements MouseListener , MouseMotionList
     JPanel buttonPanel = new JPanel();
     JButton startButton = new JButton("Start");
     JButton flipButton = new JButton("Flip");
+    JLabel selectedLabel = new JLabel("Nothing Selected");
     JPanel[][] grid;
     int size;
 
     private Ship selectedShip;
+    private Point selectedPoint;
 
     public PlaceShip(int size) {
         this.size = size;
@@ -38,18 +42,19 @@ public class PlaceShip extends JFrame implements MouseListener , MouseMotionList
             }
         }
 
+        flipButton.addMouseListener(this);
+
         borderPanel.add(mainPanel, BorderLayout.CENTER);
         borderPanel.add(buttonPanel, BorderLayout.SOUTH);
         buttonPanel.add(startButton);
         buttonPanel.add(flipButton);
+        buttonPanel.add(selectedLabel);
 
-        Helper.placeShipsRandomly(grid , Helper.playerShipMap , Color.blue);
+        Helper.placeShipsRandomly(grid , Helper.playerShipMap , Color.blue , true);
 
         window.setSize(300, 300);
         window.add(borderPanel);
         window.setVisible(true);
-
-
 
         startButton.addMouseListener(new MouseListener() {
             @Override
@@ -88,7 +93,24 @@ public class PlaceShip extends JFrame implements MouseListener , MouseMotionList
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (e.getSource() == flipButton)
+        {
+            if (!selectedLabel.getText().equals("Nothing Selected"))
+            {
+                //System.out.println("flip button clicked");
+                flipShip();
+            }
+        }
+    }
 
+    private void flipShip()
+    {
+        if (selectedShip != null )
+        {
+            System.out.println("will attempt to file ship " + selectedShip.getShipName());
+            //check if possible to flip this ship
+            Helper.attemptToFlipShip(grid,Color.blue,selectedShip , Helper.playerShipMap , true);
+        }
     }
 
     @Override
@@ -102,8 +124,16 @@ public class PlaceShip extends JFrame implements MouseListener , MouseMotionList
                         //the name attribute in the grid cell is the name of the ship
                         Ship tempShip = Helper.playerShipMap.get(grid[i][j].getName());
                         selectedShip = tempShip;
-                        System.out.println(tempShip.getColor());
-                        System.out.println(tempShip.getShipName());
+                        selectedPoint = new Point(j,i);
+                        //System.out.println(tempShip.getColor());
+                        System.out.println("selected " + tempShip.getShipName());
+                        selectedLabel.setText(selectedShip.getShipName());
+                    } else
+                    {
+                        selectedShip = null;
+                        selectedPoint = null;
+                        selectedLabel.setText("Nothing Selected");
+                        System.out.println("selected Nothing");
                     }
                 }
             }
@@ -132,27 +162,54 @@ public class PlaceShip extends JFrame implements MouseListener , MouseMotionList
     public void mouseDragged(MouseEvent e) {
         int buttonsDownMask =MouseEvent.BUTTON1_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK;
 
-        if ((e.getModifiersEx() & buttonsDownMask) !=0)
+        synchronized (this)
         {
-            //System.out.println("Mouse Moved");
-            for (int i = 0; i < grid.length; i++) {
-                for (int j = 0; j < grid[0].length; j++) {
-                    Point p = MouseInfo.getPointerInfo().getLocation();
-                    //SwingUtilities.convertPointFromScreen(p,grid[i][j]);
-                    if(isWithinBounds(p.x,p.y,grid[i][j]))
-                    {
-                        System.out.println("i="+i + " j=" + j);
-                    }
+            if ((e.getModifiersEx() & buttonsDownMask) !=0)
+            {
+                //System.out.println("Mouse Moved");
+                for (int i = 0; i < grid.length; i++) {
+                    for (int j = 0; j < grid[0].length; j++) {
+                        Point p = MouseInfo.getPointerInfo().getLocation();
+                        //SwingUtilities.convertPointFromScreen(p,grid[i][j]);
+                        if(isWithinBounds(p.x,p.y,grid[i][j]))
+                        {
+                            if (grid[i][j].getName() != null)
+                            {
+                                System.out.println(selectedPoint);
+                            }
+                            System.out.println("i="+i + " j=" + j);
+
+                            int xOffset = selectedPoint.x-j;
+                            int yOffset = selectedPoint.y-i;
+
+                            int targetX = selectedShip.getStartingPoint().x + (xOffset);
+                            int targetY = selectedShip.getStartingPoint().y + (yOffset);
+
+                            //System.out.println("targetx="+targetX + " targety=" + targetY);
+
+                            boolean placementResult =Helper.attemptToPlaceShip(grid,Helper.playerShipMap, Color.BLUE,
+                                    grid.length, grid[0].length, selectedShip,j,i,true);
+                            if (placementResult == false)
+                            {
+                                System.out.println("placement result=" + placementResult);
+                            } else
+                            {
+                                System.out.println("placement result=" + placementResult);
+                            }
+
+                        }
 
 //                    if (e.getSource() == grid[i][j]) {
 //                        System.out.println("i="+i+ " j=" + j);
 //                    }
+                    }
                 }
+            } else
+            {
+                System.out.println(e.getButton());
             }
-        } else
-        {
-            System.out.println(e.getButton());
         }
+
     }
 
     @Override

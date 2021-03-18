@@ -54,7 +54,8 @@ public class GamePlay implements MouseListener {
                 computerGrid[i][j].addMouseListener(this);
             }
         }
-        Helper.placeShipsRandomly(computerGrid, Helper.computerShipMap, Color.darkGray);
+        Helper.placeShipsRandomly(computerGrid, Helper.computerShipMap, Color.darkGray , false);
+        Helper.randomizeShipOrientation(computerGrid,Helper.computerShipMap,Color.darkGray,false);
 
         playerPanel.setPreferredSize(new Dimension(400, 400));
         borderPanel.add(playerPanel, BorderLayout.CENTER);
