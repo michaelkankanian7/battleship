@@ -62,7 +62,7 @@ public class PlaceShip extends JFrame implements MouseListener , MouseMotionList
                 JButton b = (JButton) e.getSource();
                 JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(b);
                 topFrame.setVisible(false);
-                GamePlay gamePlay = new GamePlay(size , grid);
+                GamePlay gamePlay = new GamePlay(size , grid , topFrame);
 
             }
 
